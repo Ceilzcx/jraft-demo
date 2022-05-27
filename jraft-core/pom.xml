@@ -22,18 +22,6 @@
             <artifactId>brpc-java</artifactId>
             <version>3.0.4</version>
         </dependency>
-
-        <!-- log -->
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>1.7.25</version>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
-            <version>1.7.25</version>
-        </dependency>
     </dependencies>
 
 </project>

@@ -1,22 +1,21 @@
 package com.siesta.raft.service.callback;
 
-import com.baidu.brpc.client.RpcCallback;
 import com.siesta.raft.proto.RaftProto;
+import com.siesta.raft.service.RaftServerService;
 
 /**
  * @author hujiaofen
  * @since 27/5/2022
  * 异步preVote回调函数
  */
-public class PreVoteCallback implements RpcCallback<RaftProto.VoteRequest> {
+public class PreVoteCallback extends RpcCallbackAdapter<RaftProto.VoteResponse> {
 
-    @Override
-    public void success(RaftProto.VoteRequest response) {
-
+    PreVoteCallback(RaftServerService raftServerService) {
+        super(raftServerService);
     }
 
     @Override
-    public void fail(Throwable e) {
-
+    public void success(RaftProto.VoteResponse response) {
+        this.raftServerService.handlePreVoteResponse(response);
     }
 }
