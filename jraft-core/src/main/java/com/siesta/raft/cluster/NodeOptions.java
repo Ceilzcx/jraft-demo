@@ -1,0 +1,8 @@
+package com.siesta.raft.cluster;
+
+/**
+ * @author hujiaofen
+ * @since 27/5/2022
+ */
+public class NodeOptions {
+}

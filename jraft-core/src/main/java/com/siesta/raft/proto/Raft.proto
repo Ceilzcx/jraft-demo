@@ -1,0 +1,48 @@
+syntax = "proto2";
+
+package raft;
+option java_package = "com.siesta.raft.proto";
+option java_outer_classname = "RaftProto";
+
+message Server {
+  optional int32 serverId = 1;
+  optional int32 port = 2;
+  optional string address = 3;
+}
+
+message Configuration {
+  repeated Server servers = 1;
+}
+
+message LogEntry {
+  optional int64 term = 1;      // 用于检测日志的不一致
+  optional int64 index = 2;     // 下标, 和下标一起检测不一致性
+  optional bytes data = 3;      // 操作指令
+}
+
+message AppendEntriesRequest {
+  optional int64 term = 1;
+  optional int32 leaderId = 2;
+  optional int64 prevLogIndex = 3;
+  optional int64 prevLogTerm = 4;
+  repeated LogEntry logEntries = 5;
+  optional int64 leaderCommit = 6;
+}
+
+message AppendEntriesResponse {
+  optional int64 term = 1;
+  optional bool success = 2;
+  optional int64 lastLogIndex = 3;
+}
+
+message VoteRequest {
+  optional int64 term = 1;
+  optional int32 candidateId = 2;
+  optional int64 lastLogIndex = 3;
+  optional int64 lastLogTerm = 4;
+}
+
+message VoteResponse {
+  optional int64 term = 1;
+  optional int32 voteGranted = 2;
+}
