@@ -1,7 +1,7 @@
-package com.siesta.raft.service.callback;
+package com.siesta.raft.rpc.service.callback;
 
 import com.siesta.raft.proto.RaftProto;
-import com.siesta.raft.service.RaftServerService;
+import com.siesta.raft.rpc.service.RaftHandlerResponseService;
 
 /**
  * @author hujiaofen
@@ -10,12 +10,12 @@ import com.siesta.raft.service.RaftServerService;
  */
 public class PreVoteCallback extends RpcCallbackAdapter<RaftProto.VoteResponse> {
 
-    PreVoteCallback(RaftServerService raftServerService) {
-        super(raftServerService);
+    PreVoteCallback(RaftHandlerResponseService handlerResponseService) {
+        super(handlerResponseService);
     }
 
     @Override
     public void success(RaftProto.VoteResponse response) {
-        this.raftServerService.handlePreVoteResponse(response);
+        this.handlerResponseService.handlePreVoteResponse(response);
     }
 }

@@ -1,7 +1,7 @@
-package com.siesta.raft.service.callback;
+package com.siesta.raft.rpc.service.callback;
 
 import com.baidu.brpc.client.RpcCallback;
-import com.siesta.raft.service.RaftServerService;
+import com.siesta.raft.rpc.service.RaftHandlerResponseService;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -10,10 +10,10 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public abstract class RpcCallbackAdapter<T> implements RpcCallback<T> {
-    protected final RaftServerService raftServerService;
+    protected final RaftHandlerResponseService handlerResponseService;
 
-    RpcCallbackAdapter(RaftServerService raftServerService) {
-        this.raftServerService = raftServerService;
+    RpcCallbackAdapter(RaftHandlerResponseService handlerResponseService) {
+        this.handlerResponseService = handlerResponseService;
     }
 
     @Override

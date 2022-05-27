@@ -24,6 +24,7 @@ public interface Node extends Lifecycle<NodeOptions> {
 
     /**
      * 判断当前节点是否为leader节点
+     * 重定向使用
      */
     boolean isLeader();
 
