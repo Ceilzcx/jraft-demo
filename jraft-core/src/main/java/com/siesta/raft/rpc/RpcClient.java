@@ -10,6 +10,7 @@ public interface RpcClient {
 
     boolean checkConnection(final RaftProto.Server server);
 
+    boolean connect(final RaftProto.Server server);
 
-
+    boolean disconnect(final RaftProto.Server server);
 }

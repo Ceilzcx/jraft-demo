@@ -22,11 +22,12 @@ message LogEntry {
 
 message AppendEntriesRequest {
   optional int64 term = 1;
-  optional int32 leaderId = 2;
-  optional int64 prevLogIndex = 3;
-  optional int64 prevLogTerm = 4;
-  repeated LogEntry logEntries = 5;
-  optional int64 leaderCommit = 6;
+  optional string groupId = 2;
+  optional Server leaderId = 3;
+  optional int64 prevLogIndex = 4;
+  optional int64 prevLogTerm = 5;
+  repeated LogEntry logEntries = 6;
+  optional int64 commitIndex = 7;
 }
 
 message AppendEntriesResponse {
@@ -37,9 +38,10 @@ message AppendEntriesResponse {
 
 message VoteRequest {
   optional int64 term = 1;
-  optional int32 candidateId = 2;
-  optional int64 lastLogIndex = 3;
-  optional int64 lastLogTerm = 4;
+  optional string groupId = 2;
+  optional Server serverId = 3;
+  optional int64 lastLogIndex = 4;
+  optional int64 lastLogTerm = 5;
 }
 
 message VoteResponse {

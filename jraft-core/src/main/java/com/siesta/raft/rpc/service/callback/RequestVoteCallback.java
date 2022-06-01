@@ -8,9 +8,9 @@ import com.siesta.raft.rpc.service.RaftHandlerResponseService;
  * @since 27/5/2022
  * 异步requestVote回调函数
  */
-public class VoteCallback extends RpcCallbackAdapter<RaftProto.VoteResponse> {
+public class RequestVoteCallback extends RpcCallbackAdapter<RaftProto.VoteResponse> {
 
-    VoteCallback(RaftHandlerResponseService handlerResponseService) {
+    public RequestVoteCallback(RaftHandlerResponseService handlerResponseService) {
         super(handlerResponseService);
     }
 

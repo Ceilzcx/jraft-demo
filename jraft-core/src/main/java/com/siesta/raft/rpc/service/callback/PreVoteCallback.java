@@ -10,7 +10,7 @@ import com.siesta.raft.rpc.service.RaftHandlerResponseService;
  */
 public class PreVoteCallback extends RpcCallbackAdapter<RaftProto.VoteResponse> {
 
-    PreVoteCallback(RaftHandlerResponseService handlerResponseService) {
+    public PreVoteCallback(RaftHandlerResponseService handlerResponseService) {
         super(handlerResponseService);
     }
 

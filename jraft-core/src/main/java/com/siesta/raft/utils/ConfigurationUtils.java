@@ -17,4 +17,8 @@ public class ConfigurationUtils {
     public static RaftProto.Configuration parseConfiguration(String str) {
         return null;
     }
+
+    public static boolean containsNode(RaftProto.Configuration configuration, RaftProto.Server server) {
+        return configuration.getServersList().contains(server);
+    }
 }
