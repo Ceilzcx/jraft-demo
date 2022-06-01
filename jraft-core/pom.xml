@@ -17,10 +17,17 @@
     </properties>
 
     <dependencies>
+        <!--rpc-->
         <dependency>
             <groupId>com.baidu</groupId>
             <artifactId>brpc-java</artifactId>
             <version>3.0.4</version>
+        </dependency>
+        <!--rocksdb-->
+        <dependency>
+            <groupId>org.rocksdb</groupId>
+            <artifactId>rocksdbjni</artifactId>
+            <version>7.2.2</version>
         </dependency>
     </dependencies>
 
