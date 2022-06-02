@@ -8,6 +8,7 @@ import com.siesta.raft.rpc.service.RaftServerService;
 import com.siesta.raft.rpc.service.callback.PreVoteCallback;
 import com.siesta.raft.rpc.service.callback.RequestVoteCallback;
 import com.siesta.raft.storage.LogStorage;
+import com.siesta.raft.utils.ConfigurationUtils;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.concurrent.locks.Lock;
@@ -150,7 +151,41 @@ public class NodeImpl implements Node, RaftServerService, RaftHandlerResponseSer
 
     @Override
     public RaftProto.VoteResponse handlePreVote(RaftProto.VoteRequest request) {
-        return null;
+        this.writeLock.lock();
+        try {
+            RaftProto.Server granted = null;
+            do {
+                if (!ConfigurationUtils.containsNode(this.configuration, request.getServerId())) {
+                    log.warn("pre vote request invalid, configuration not contains node {}", request.getServerId());
+                    break;
+                }
+                if (this.nodeType != NodeType.FOLLOWER) {
+                    log.warn("pre vote request invalid, local node {} type is not follower", this.localServer);
+                    break;
+                }
+                // todo 判断当前节点的leader是否可用，可用可以不进行选举
+
+                if (request.getTerm() < this.currentTerm) {
+                    log.warn("pre vote request invalid, request term = {}, current term = {}", request.getTerm(), this.currentTerm);
+                    break;
+                }
+                long lastLogIndex = this.logStorage.getLastLogIndex();
+                long lastLogTerm = this.logStorage.getLogEntry(lastLogIndex).getTerm();
+                // todo log is not consistency, is ok?
+                if (request.getLastLogIndex() < lastLogIndex || (request.getLastLogIndex() == lastLogIndex && request.getLastLogTerm() != lastLogTerm)) {
+                    log.warn("pre vote request invalid, request lastLogIndex: {}, lastLogTerm: {}, local lastLogIndex: {}, lastLogTerm: {}",
+                            request.getLastLogIndex(), request.getLastLogTerm(), lastLogIndex, lastLogTerm);
+                    break;
+                }
+                granted = request.getServerId();
+            } while (false);
+            return RaftProto.VoteResponse.newBuilder()
+                    .setTerm(this.currentTerm)
+                    .setVoteGranted(granted)
+                    .build();
+        } finally {
+            this.writeLock.unlock();
+        }
     }
 
     @Override
@@ -235,7 +270,45 @@ public class NodeImpl implements Node, RaftServerService, RaftHandlerResponseSer
 
     @Override
     public RaftProto.VoteResponse handleRequestVote(RaftProto.VoteRequest request) {
-        return null;
+        this.writeLock.lock();
+        try {
+            RaftProto.Server granted = null;
+            do {
+                if (!ConfigurationUtils.containsNode(this.configuration, request.getServerId())) {
+                    log.warn("request vote request invalid, configuration not contains node {}", request.getServerId());
+                    break;
+                }
+                if (this.nodeType != NodeType.PRE_CANDIDATE) {
+                    log.warn("request vote request invalid, local node {} type is not follower", this.localServer);
+                    break;
+                }
+                // todo 判断当前节点的leader是否可用，可用可以不进行选举
+
+                if (request.getTerm() < this.currentTerm) {
+                    log.warn("request vote request invalid, request term = {}, current term = {}", request.getTerm(), this.currentTerm);
+                    break;
+                }
+                long lastLogIndex = this.logStorage.getLastLogIndex();
+                long lastLogTerm = this.logStorage.getLogEntry(lastLogIndex).getTerm();
+                // todo log is not consistency, is ok?
+                if (request.getLastLogIndex() < lastLogIndex || (request.getLastLogIndex() == lastLogIndex && request.getLastLogTerm() != lastLogTerm)) {
+                    log.warn("request vote request invalid, request lastLogIndex: {}, lastLogTerm: {}, local lastLogIndex: {}, lastLogTerm: {}",
+                            request.getLastLogIndex(), request.getLastLogTerm(), lastLogIndex, lastLogTerm);
+                    break;
+                }
+                if (this.voteServer != null) {
+                    break;
+                }
+                granted = request.getServerId();
+                this.voteServer = request.getServerId();
+            } while (false);
+            return RaftProto.VoteResponse.newBuilder()
+                    .setTerm(this.currentTerm)
+                    .setVoteGranted(granted)
+                    .build();
+        } finally {
+            this.writeLock.unlock();
+        }
     }
 
     @Override
