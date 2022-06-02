@@ -10,7 +10,7 @@ public interface RaftHandlerResponseService {
 
     void handleAppendEntriesResponse(RaftProto.AppendEntriesResponse response);
 
-    void handlePreVoteResponse(RaftProto.VoteResponse response, long term);
+    void handlePreVoteResponse(RaftProto.VoteResponse response, RaftProto.Server server, long term);
 
-    void handleRequestVoteResponse(RaftProto.VoteResponse response, long term);
+    void handleRequestVoteResponse(RaftProto.VoteResponse response, RaftProto.Server server, long term);
 }

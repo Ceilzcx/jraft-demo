@@ -9,15 +9,17 @@ import com.siesta.raft.rpc.service.RaftHandlerResponseService;
  * 异步requestVote回调函数
  */
 public class RequestVoteCallback extends RpcCallbackAdapter<RaftProto.VoteResponse> {
+    private final RaftProto.Server server;
     private final long term;
 
-    public RequestVoteCallback(RaftHandlerResponseService handlerResponseService, long term) {
+    public RequestVoteCallback(RaftHandlerResponseService handlerResponseService, RaftProto.Server server, long term) {
         super(handlerResponseService);
+        this.server = server;
         this.term = term;
     }
 
     @Override
     public void success(RaftProto.VoteResponse response) {
-        this.handlerResponseService.handleRequestVoteResponse(response, term);
+        this.handlerResponseService.handleRequestVoteResponse(response, server, term);
     }
 }

@@ -141,7 +141,7 @@ public class NodeImpl implements Node, RaftServerService, RaftHandlerResponseSer
                         .setLastLogIndex(lastLogIndex)
                         .setLastLogTerm(lastLogTerm)
                         .build();
-                clientService.preVote(server, request, new PreVoteCallback(this, this.currentTerm));
+                clientService.preVote(server, request, new PreVoteCallback(this, server, this.currentTerm));
             }
         } finally {
             this.writeLock.unlock();
@@ -154,7 +154,7 @@ public class NodeImpl implements Node, RaftServerService, RaftHandlerResponseSer
     }
 
     @Override
-    public void handlePreVoteResponse(RaftProto.VoteResponse response, long term) {
+    public void handlePreVoteResponse(RaftProto.VoteResponse response, RaftProto.Server server, long term) {
         this.writeLock.lock();
         try {
             if (this.nodeType != NodeType.PRE_CANDIDATE) {
@@ -173,8 +173,8 @@ public class NodeImpl implements Node, RaftServerService, RaftHandlerResponseSer
                 stepDown(response.getTerm());
                 return;
             }
-            if (this.ballot.grant(response.getVoteGranted())) {
-                log.info("node {} grant pre vote success", response.getVoteGranted());
+            if (this.localServer.equals(response.getVoteGranted()) && this.ballot.grant(server)) {
+                log.info("node {} grant pre vote success", server);
                 if (this.ballot.isGranted()) {
                     requestVote();
                 }
@@ -226,7 +226,7 @@ public class NodeImpl implements Node, RaftServerService, RaftHandlerResponseSer
                         .setLastLogIndex(lastLogIndex)
                         .setLastLogTerm(lastLogTerm)
                         .build();
-                clientService.requestVote(server, request, new RequestVoteCallback(this, this.currentTerm));
+                clientService.requestVote(server, request, new RequestVoteCallback(this, server, this.currentTerm));
             }
         } finally {
             this.writeLock.unlock();
@@ -239,7 +239,7 @@ public class NodeImpl implements Node, RaftServerService, RaftHandlerResponseSer
     }
 
     @Override
-    public void handleRequestVoteResponse(RaftProto.VoteResponse response, long term) {
+    public void handleRequestVoteResponse(RaftProto.VoteResponse response, RaftProto.Server server, long term) {
         this.writeLock.lock();
         try {
             if (this.nodeType != NodeType.CANDIDATE) {
@@ -258,8 +258,8 @@ public class NodeImpl implements Node, RaftServerService, RaftHandlerResponseSer
                 stepDown(response.getTerm());
                 return;
             }
-            if (this.ballot.grant(response.getVoteGranted())) {
-                log.info("node {} grant request vote success", response.getVoteGranted());
+            if (this.localServer.equals(response.getVoteGranted()) && this.ballot.grant(server)) {
+                log.info("node {} grant request vote success", server);
                 if (this.ballot.isGranted()) {
                     becomeLeader();
                 }
