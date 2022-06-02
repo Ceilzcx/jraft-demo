@@ -1,5 +1,6 @@
 package com.siesta.raft.cluster;
 
+import com.siesta.raft.entity.Ballot;
 import com.siesta.raft.entity.RaftProto;
 import com.siesta.raft.rpc.service.RaftClientService;
 import com.siesta.raft.rpc.service.RaftHandlerResponseService;
@@ -31,8 +32,8 @@ public class NodeImpl implements Node, RaftServerService, RaftHandlerResponseSer
 
     private long currentTerm;
 
+    private Ballot ballot;
     private LogStorage logStorage;
-
     private RaftClientService clientService;
 
     public NodeImpl(RaftProto.Configuration configuration, RaftProto.Server server) {
@@ -120,8 +121,8 @@ public class NodeImpl implements Node, RaftServerService, RaftHandlerResponseSer
                 return;
             }
             this.nodeType = NodeType.PRE_CANDIDATE;
-
-            for (RaftProto.Server server : configuration.getServersList()) {
+            this.ballot.init(this.configuration);
+            for (RaftProto.Server server : this.configuration.getServersList()) {
                 if (server.equals(this.localServer)) {
                     continue;
                 }
@@ -179,6 +180,7 @@ public class NodeImpl implements Node, RaftServerService, RaftHandlerResponseSer
             if (oldTerm != this.currentTerm) {
                 return;
             }
+            this.ballot.init(configuration);
             for (RaftProto.Server server : configuration.getServersList()) {
                 if (server.equals(this.localServer)) {
                     continue;
