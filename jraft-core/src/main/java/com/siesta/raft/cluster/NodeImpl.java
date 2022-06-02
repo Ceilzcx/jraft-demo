@@ -34,7 +34,8 @@ public class NodeImpl implements Node, RaftServerService, RaftHandlerResponseSer
 
     private long currentTerm;
 
-    private Ballot ballot;
+    private Ballot preVoteBallot;
+    private Ballot voteBallot;
     private LogStorage logStorage;
     private RaftClientService clientService;
 
@@ -48,7 +49,8 @@ public class NodeImpl implements Node, RaftServerService, RaftHandlerResponseSer
         this.nodeType = NodeType.FOLLOWER;
         this.leaderServer = null;
         this.voteServer = null;
-        this.ballot = new Ballot();
+        this.preVoteBallot = new Ballot();
+        this.voteBallot = new Ballot();
         this.nodeOptions = options;
         return true;
     }
@@ -118,7 +120,6 @@ public class NodeImpl implements Node, RaftServerService, RaftHandlerResponseSer
             this.writeLock.unlock();
         }
 
-
         long lastLogIndex = logStorage.getLastLogIndex();
         long lastLogTerm = logStorage.getLogEntry(lastLogIndex).getTerm();
 
@@ -128,7 +129,7 @@ public class NodeImpl implements Node, RaftServerService, RaftHandlerResponseSer
                 return;
             }
             this.nodeType = NodeType.PRE_CANDIDATE;
-            this.ballot.init(this.configuration);
+            this.preVoteBallot.init(this.configuration);
             for (RaftProto.Server server : this.configuration.getServersList()) {
                 if (server.equals(this.localServer)) {
                     continue;
@@ -169,12 +170,7 @@ public class NodeImpl implements Node, RaftServerService, RaftHandlerResponseSer
                     log.warn("pre vote request invalid, request term = {}, current term = {}", request.getTerm(), this.currentTerm);
                     break;
                 }
-                long lastLogIndex = this.logStorage.getLastLogIndex();
-                long lastLogTerm = this.logStorage.getLogEntry(lastLogIndex).getTerm();
-                // todo log is not consistency, is ok?
-                if (request.getLastLogIndex() < lastLogIndex || (request.getLastLogIndex() == lastLogIndex && request.getLastLogTerm() != lastLogTerm)) {
-                    log.warn("pre vote request invalid, request lastLogIndex: {}, lastLogTerm: {}, local lastLogIndex: {}, lastLogTerm: {}",
-                            request.getLastLogIndex(), request.getLastLogTerm(), lastLogIndex, lastLogTerm);
+                if (!compareLog(request.getLastLogIndex(), request.getLastLogIndex(), "pre vote request invalid")) {
                     break;
                 }
                 granted = request.getServerId();
@@ -208,9 +204,9 @@ public class NodeImpl implements Node, RaftServerService, RaftHandlerResponseSer
                 stepDown(response.getTerm());
                 return;
             }
-            if (this.localServer.equals(response.getVoteGranted()) && this.ballot.grant(server)) {
+            if (this.localServer.equals(response.getVoteGranted()) && this.preVoteBallot.grant(server)) {
                 log.info("node {} grant pre vote success", server);
-                if (this.ballot.isGranted()) {
+                if (this.preVoteBallot.isGranted()) {
                     requestVote();
                 }
             }
@@ -247,7 +243,7 @@ public class NodeImpl implements Node, RaftServerService, RaftHandlerResponseSer
             if (oldTerm != this.currentTerm) {
                 return;
             }
-            this.ballot.init(configuration);
+            this.voteBallot.init(configuration);
             for (RaftProto.Server server : configuration.getServersList()) {
                 if (server.equals(this.localServer)) {
                     continue;
@@ -288,12 +284,7 @@ public class NodeImpl implements Node, RaftServerService, RaftHandlerResponseSer
                     log.warn("request vote request invalid, request term = {}, current term = {}", request.getTerm(), this.currentTerm);
                     break;
                 }
-                long lastLogIndex = this.logStorage.getLastLogIndex();
-                long lastLogTerm = this.logStorage.getLogEntry(lastLogIndex).getTerm();
-                // todo log is not consistency, is ok?
-                if (request.getLastLogIndex() < lastLogIndex || (request.getLastLogIndex() == lastLogIndex && request.getLastLogTerm() != lastLogTerm)) {
-                    log.warn("request vote request invalid, request lastLogIndex: {}, lastLogTerm: {}, local lastLogIndex: {}, lastLogTerm: {}",
-                            request.getLastLogIndex(), request.getLastLogTerm(), lastLogIndex, lastLogTerm);
+                if (!compareLog(request.getLastLogIndex(), request.getLastLogIndex(), "request vote request invalid")) {
                     break;
                 }
                 if (this.voteServer != null) {
@@ -331,9 +322,9 @@ public class NodeImpl implements Node, RaftServerService, RaftHandlerResponseSer
                 stepDown(response.getTerm());
                 return;
             }
-            if (this.localServer.equals(response.getVoteGranted()) && this.ballot.grant(server)) {
+            if (this.localServer.equals(response.getVoteGranted()) && this.voteBallot.grant(server)) {
                 log.info("node {} grant request vote success", server);
-                if (this.ballot.isGranted()) {
+                if (this.voteBallot.isGranted()) {
                     becomeLeader();
                 }
             }
@@ -348,5 +339,17 @@ public class NodeImpl implements Node, RaftServerService, RaftHandlerResponseSer
 
     private void becomeLeader() {
         this.nodeType = NodeType.LEADER;
+    }
+
+    private boolean compareLog(long lastLogIndex, long lastLogTerm, String logTitle) {
+        long localLastLogIndex = this.logStorage.getLastLogIndex();
+        long localLastLogTerm = this.logStorage.getLogEntry(lastLogIndex).getTerm();
+        boolean isOK = lastLogIndex > localLastLogIndex || (lastLogIndex == localLastLogIndex && lastLogTerm == localLastLogTerm);
+        // todo log is not consistency, is ok?
+        if (!isOK) {
+            log.warn("{}, request lastLogIndex: {}, lastLogTerm: {}, local lastLogIndex: {}, lastLogTerm: {}",
+                    logTitle, lastLogIndex, lastLogTerm, lastLogIndex, lastLogTerm);
+        }
+        return isOK;
     }
 }
