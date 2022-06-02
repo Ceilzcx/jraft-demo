@@ -4798,15 +4798,19 @@ public final class RaftProto {
      */
     long getTerm();
 
-    // optional int32 voteGranted = 2;
+    // optional .raft.Server voteGranted = 2;
     /**
-     * <code>optional int32 voteGranted = 2;</code>
+     * <code>optional .raft.Server voteGranted = 2;</code>
      */
     boolean hasVoteGranted();
     /**
-     * <code>optional int32 voteGranted = 2;</code>
+     * <code>optional .raft.Server voteGranted = 2;</code>
      */
-    int getVoteGranted();
+    Server getVoteGranted();
+    /**
+     * <code>optional .raft.Server voteGranted = 2;</code>
+     */
+    ServerOrBuilder getVoteGrantedOrBuilder();
   }
   /**
    * Protobuf type {@code raft.VoteResponse}
@@ -4864,9 +4868,17 @@ public final class RaftProto {
               term_ = input.readInt64();
               break;
             }
-            case 16: {
+            case 18: {
+              Server.Builder subBuilder = null;
+              if (((bitField0_ & 0x00000002) == 0x00000002)) {
+                subBuilder = voteGranted_.toBuilder();
+              }
+              voteGranted_ = input.readMessage(Server.PARSER, extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(voteGranted_);
+                voteGranted_ = subBuilder.buildPartial();
+              }
               bitField0_ |= 0x00000002;
-              voteGranted_ = input.readInt32();
               break;
             }
           }
@@ -4925,25 +4937,31 @@ public final class RaftProto {
       return term_;
     }
 
-    // optional int32 voteGranted = 2;
+    // optional .raft.Server voteGranted = 2;
     public static final int VOTEGRANTED_FIELD_NUMBER = 2;
-    private int voteGranted_;
+    private Server voteGranted_;
     /**
-     * <code>optional int32 voteGranted = 2;</code>
+     * <code>optional .raft.Server voteGranted = 2;</code>
      */
     public boolean hasVoteGranted() {
       return ((bitField0_ & 0x00000002) == 0x00000002);
     }
     /**
-     * <code>optional int32 voteGranted = 2;</code>
+     * <code>optional .raft.Server voteGranted = 2;</code>
      */
-    public int getVoteGranted() {
+    public Server getVoteGranted() {
+      return voteGranted_;
+    }
+    /**
+     * <code>optional .raft.Server voteGranted = 2;</code>
+     */
+    public ServerOrBuilder getVoteGrantedOrBuilder() {
       return voteGranted_;
     }
 
     private void initFields() {
       term_ = 0L;
-      voteGranted_ = 0;
+      voteGranted_ = Server.getDefaultInstance();
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -4961,7 +4979,7 @@ public final class RaftProto {
         output.writeInt64(1, term_);
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
-        output.writeInt32(2, voteGranted_);
+        output.writeMessage(2, voteGranted_);
       }
       getUnknownFields().writeTo(output);
     }
@@ -4978,7 +4996,7 @@ public final class RaftProto {
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeInt32Size(2, voteGranted_);
+          .computeMessageSize(2, voteGranted_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -5088,6 +5106,7 @@ public final class RaftProto {
       }
       private void maybeForceBuilderInitialization() {
         if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+          getVoteGrantedFieldBuilder();
         }
       }
       private static Builder create() {
@@ -5098,7 +5117,11 @@ public final class RaftProto {
         super.clear();
         term_ = 0L;
         bitField0_ = (bitField0_ & ~0x00000001);
-        voteGranted_ = 0;
+        if (voteGrantedBuilder_ == null) {
+          voteGranted_ = Server.getDefaultInstance();
+        } else {
+          voteGrantedBuilder_.clear();
+        }
         bitField0_ = (bitField0_ & ~0x00000002);
         return this;
       }
@@ -5135,7 +5158,11 @@ public final class RaftProto {
         if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
           to_bitField0_ |= 0x00000002;
         }
-        result.voteGranted_ = voteGranted_;
+        if (voteGrantedBuilder_ == null) {
+          result.voteGranted_ = voteGranted_;
+        } else {
+          result.voteGranted_ = voteGrantedBuilder_.build();
+        }
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -5156,7 +5183,7 @@ public final class RaftProto {
           setTerm(other.getTerm());
         }
         if (other.hasVoteGranted()) {
-          setVoteGranted(other.getVoteGranted());
+          mergeVoteGranted(other.getVoteGranted());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
@@ -5218,37 +5245,121 @@ public final class RaftProto {
         return this;
       }
 
-      // optional int32 voteGranted = 2;
-      private int voteGranted_ ;
+      // optional .raft.Server voteGranted = 2;
+      private Server voteGranted_ = Server.getDefaultInstance();
+      private com.google.protobuf.SingleFieldBuilder<
+          Server, Server.Builder, ServerOrBuilder> voteGrantedBuilder_;
       /**
-       * <code>optional int32 voteGranted = 2;</code>
+       * <code>optional .raft.Server voteGranted = 2;</code>
        */
       public boolean hasVoteGranted() {
         return ((bitField0_ & 0x00000002) == 0x00000002);
       }
       /**
-       * <code>optional int32 voteGranted = 2;</code>
+       * <code>optional .raft.Server voteGranted = 2;</code>
        */
-      public int getVoteGranted() {
-        return voteGranted_;
+      public Server getVoteGranted() {
+        if (voteGrantedBuilder_ == null) {
+          return voteGranted_;
+        } else {
+          return voteGrantedBuilder_.getMessage();
+        }
       }
       /**
-       * <code>optional int32 voteGranted = 2;</code>
+       * <code>optional .raft.Server voteGranted = 2;</code>
        */
-      public Builder setVoteGranted(int value) {
+      public Builder setVoteGranted(Server value) {
+        if (voteGrantedBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          voteGranted_ = value;
+          onChanged();
+        } else {
+          voteGrantedBuilder_.setMessage(value);
+        }
         bitField0_ |= 0x00000002;
-        voteGranted_ = value;
-        onChanged();
         return this;
       }
       /**
-       * <code>optional int32 voteGranted = 2;</code>
+       * <code>optional .raft.Server voteGranted = 2;</code>
+       */
+      public Builder setVoteGranted(
+          Server.Builder builderForValue) {
+        if (voteGrantedBuilder_ == null) {
+          voteGranted_ = builderForValue.build();
+          onChanged();
+        } else {
+          voteGrantedBuilder_.setMessage(builderForValue.build());
+        }
+        bitField0_ |= 0x00000002;
+        return this;
+      }
+      /**
+       * <code>optional .raft.Server voteGranted = 2;</code>
+       */
+      public Builder mergeVoteGranted(Server value) {
+        if (voteGrantedBuilder_ == null) {
+          if (((bitField0_ & 0x00000002) == 0x00000002) &&
+              voteGranted_ != Server.getDefaultInstance()) {
+            voteGranted_ =
+              Server.newBuilder(voteGranted_).mergeFrom(value).buildPartial();
+          } else {
+            voteGranted_ = value;
+          }
+          onChanged();
+        } else {
+          voteGrantedBuilder_.mergeFrom(value);
+        }
+        bitField0_ |= 0x00000002;
+        return this;
+      }
+      /**
+       * <code>optional .raft.Server voteGranted = 2;</code>
        */
       public Builder clearVoteGranted() {
+        if (voteGrantedBuilder_ == null) {
+          voteGranted_ = Server.getDefaultInstance();
+          onChanged();
+        } else {
+          voteGrantedBuilder_.clear();
+        }
         bitField0_ = (bitField0_ & ~0x00000002);
-        voteGranted_ = 0;
-        onChanged();
         return this;
+      }
+      /**
+       * <code>optional .raft.Server voteGranted = 2;</code>
+       */
+      public Server.Builder getVoteGrantedBuilder() {
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return getVoteGrantedFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>optional .raft.Server voteGranted = 2;</code>
+       */
+      public ServerOrBuilder getVoteGrantedOrBuilder() {
+        if (voteGrantedBuilder_ != null) {
+          return voteGrantedBuilder_.getMessageOrBuilder();
+        } else {
+          return voteGranted_;
+        }
+      }
+      /**
+       * <code>optional .raft.Server voteGranted = 2;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilder<
+          Server, Server.Builder, ServerOrBuilder>
+          getVoteGrantedFieldBuilder() {
+        if (voteGrantedBuilder_ == null) {
+          voteGrantedBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+              Server, Server.Builder, ServerOrBuilder>(
+                  voteGranted_,
+                  getParentForChildren(),
+                  isClean());
+          voteGranted_ = null;
+        }
+        return voteGrantedBuilder_;
       }
 
       // @@protoc_insertion_point(builder_scope:raft.VoteResponse)
@@ -5320,9 +5431,9 @@ public final class RaftProto {
       "\030\003 \001(\003\"w\n\013VoteRequest\022\014\n\004term\030\001 \001(\003\022\017\n\007g" +
       "roupId\030\002 \001(\t\022\036\n\010serverId\030\003 \001(\0132\014.raft.Se" +
       "rver\022\024\n\014lastLogIndex\030\004 \001(\003\022\023\n\013lastLogTer" +
-      "m\030\005 \001(\003\"1\n\014VoteResponse\022\014\n\004term\030\001 \001(\003\022\023\n" +
-      "\013voteGranted\030\002 \001(\005B#\n\026com.siesta.raft.en" +
-      "tityB\tRaftProto"
+      "m\030\005 \001(\003\"?\n\014VoteResponse\022\014\n\004term\030\001 \001(\003\022!\n" +
+      "\013voteGranted\030\002 \001(\0132\014.raft.ServerB#\n\026com." +
+      "siesta.raft.entityB\tRaftProto"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {

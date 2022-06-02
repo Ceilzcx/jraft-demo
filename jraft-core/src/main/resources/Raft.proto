@@ -46,5 +46,5 @@ message VoteRequest {
 
 message VoteResponse {
   optional int64 term = 1;
-  optional int32 voteGranted = 2;
+  optional Server voteGranted = 2;
 }

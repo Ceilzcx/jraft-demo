@@ -29,6 +29,7 @@ public class NodeImpl implements Node, RaftServerService, RaftHandlerResponseSer
     private NodeType nodeType;
     private RaftProto.Server leaderServer;
     private RaftProto.Server voteServer;
+    private NodeOptions nodeOptions;
 
     private long currentTerm;
 
@@ -43,7 +44,12 @@ public class NodeImpl implements Node, RaftServerService, RaftHandlerResponseSer
 
     @Override
     public boolean init(NodeOptions options) {
-        return false;
+        this.nodeType = NodeType.FOLLOWER;
+        this.leaderServer = null;
+        this.voteServer = null;
+        this.ballot = new Ballot();
+        this.nodeOptions = options;
+        return true;
     }
 
     @Override
@@ -135,7 +141,7 @@ public class NodeImpl implements Node, RaftServerService, RaftHandlerResponseSer
                         .setLastLogIndex(lastLogIndex)
                         .setLastLogTerm(lastLogTerm)
                         .build();
-                clientService.preVote(server, request, new PreVoteCallback(this));
+                clientService.preVote(server, request, new PreVoteCallback(this, this.currentTerm));
             }
         } finally {
             this.writeLock.unlock();
@@ -148,8 +154,34 @@ public class NodeImpl implements Node, RaftServerService, RaftHandlerResponseSer
     }
 
     @Override
-    public void handlePreVoteResponse(RaftProto.VoteResponse response) {
-
+    public void handlePreVoteResponse(RaftProto.VoteResponse response, long term) {
+        this.writeLock.lock();
+        try {
+            if (this.nodeType != NodeType.PRE_CANDIDATE) {
+                log.warn("pre vote response invalid, local Node {} type is not follower", this.localServer);
+                return;
+            }
+            // 不是本次term发送的request收到的请求
+            if (term != this.currentTerm) {
+                log.warn("pre vote response invalid, local Node {} current term = {} term = {} ",
+                        this.localServer, this.currentTerm, term);
+                return;
+            }
+            if (response.getTerm() > this.currentTerm) {
+                log.warn("pre vote response invalid, local Node {} current term = {} response term = {}",
+                        this.localServer, this.currentTerm, response.getTerm());
+                stepDown(response.getTerm());
+                return;
+            }
+            if (this.ballot.grant(response.getVoteGranted())) {
+                log.info("node {} grant pre vote success", response.getVoteGranted());
+                if (this.ballot.isGranted()) {
+                    requestVote();
+                }
+            }
+        } finally {
+            this.writeLock.unlock();
+        }
     }
 
     public void requestVote() {
@@ -194,7 +226,7 @@ public class NodeImpl implements Node, RaftServerService, RaftHandlerResponseSer
                         .setLastLogIndex(lastLogIndex)
                         .setLastLogTerm(lastLogTerm)
                         .build();
-                clientService.requestVote(server, request, new RequestVoteCallback(this));
+                clientService.requestVote(server, request, new RequestVoteCallback(this, this.currentTerm));
             }
         } finally {
             this.writeLock.unlock();
@@ -207,7 +239,41 @@ public class NodeImpl implements Node, RaftServerService, RaftHandlerResponseSer
     }
 
     @Override
-    public void handleRequestVoteResponse(RaftProto.VoteResponse response) {
+    public void handleRequestVoteResponse(RaftProto.VoteResponse response, long term) {
+        this.writeLock.lock();
+        try {
+            if (this.nodeType != NodeType.CANDIDATE) {
+                log.warn("request vote response invalid, local Node {} type is not follower", this.localServer);
+                return;
+            }
+            // 不是本次term发送的request收到的请求
+            if (term != this.currentTerm) {
+                log.warn("request vote response invalid, local Node {} current term = {} term = {} ",
+                        this.localServer, this.currentTerm, term);
+                return;
+            }
+            if (response.getTerm() > this.currentTerm) {
+                log.warn("request vote response invalid, local Node {} current term = {} response term = {}",
+                        this.localServer, this.currentTerm, response.getTerm());
+                stepDown(response.getTerm());
+                return;
+            }
+            if (this.ballot.grant(response.getVoteGranted())) {
+                log.info("node {} grant request vote success", response.getVoteGranted());
+                if (this.ballot.isGranted()) {
+                    becomeLeader();
+                }
+            }
+        } finally {
+            this.writeLock.unlock();
+        }
+    }
 
+    private void stepDown(long term) {
+
+    }
+
+    private void becomeLeader() {
+        this.nodeType = NodeType.LEADER;
     }
 }

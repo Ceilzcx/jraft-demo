@@ -1,5 +1,6 @@
 package com.siesta.raft.entity;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -21,7 +22,7 @@ public class Ballot {
 
     }
 
-    private List<NotFoundServer> serverList;
+    private final List<NotFoundServer> serverList = new ArrayList<>();
     private int voteCount;
 
     public void init(final RaftProto.Configuration configuration) {
@@ -33,17 +34,18 @@ public class Ballot {
         this.voteCount = this.serverList.size() / 2 + 1;
     }
 
-    public void grant(RaftProto.Server server) {
+    public boolean grant(RaftProto.Server server) {
         for (NotFoundServer notFoundServer : serverList) {
             if (notFoundServer.server.equals(server) && !notFoundServer.isFound) {
                 this.voteCount--;
                 notFoundServer.isFound = true;
+                return true;
             }
         }
+        return false;
     }
 
     public boolean isGranted() {
         return this.voteCount <= 0;
     }
-
 }
