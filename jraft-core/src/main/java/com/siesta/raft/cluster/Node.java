@@ -1,7 +1,7 @@
 package com.siesta.raft.cluster;
 
 import com.siesta.raft.Lifecycle;
-import com.siesta.raft.proto.RaftProto;
+import com.siesta.raft.entity.RaftProto;
 
 /**
  * @author hujiaofen

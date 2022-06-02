@@ -1,6 +1,6 @@
 package com.siesta.raft.utils;
 
-import com.siesta.raft.proto.RaftProto;
+import com.siesta.raft.entity.RaftProto;
 
 /**
  * @author hujiaofen

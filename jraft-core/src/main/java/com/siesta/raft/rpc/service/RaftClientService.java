@@ -1,7 +1,7 @@
 package com.siesta.raft.rpc.service;
 
 
-import com.siesta.raft.proto.RaftProto;
+import com.siesta.raft.entity.RaftProto;
 import com.siesta.raft.rpc.RpcClient;
 import com.siesta.raft.rpc.service.callback.PreVoteCallback;
 import com.siesta.raft.rpc.service.callback.RequestVoteCallback;

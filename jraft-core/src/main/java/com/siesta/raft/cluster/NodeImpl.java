@@ -1,6 +1,6 @@
 package com.siesta.raft.cluster;
 
-import com.siesta.raft.proto.RaftProto;
+import com.siesta.raft.entity.RaftProto;
 import com.siesta.raft.rpc.service.RaftClientService;
 import com.siesta.raft.rpc.service.RaftHandlerResponseService;
 import com.siesta.raft.rpc.service.RaftServerService;
@@ -197,10 +197,6 @@ public class NodeImpl implements Node, RaftServerService, RaftHandlerResponseSer
         } finally {
             this.writeLock.unlock();
         }
-    }
-
-    private void extracted() {
-        log.warn("request vote ");
     }
 
     @Override
