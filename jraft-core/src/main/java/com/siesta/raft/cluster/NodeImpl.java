@@ -9,8 +9,10 @@ import com.siesta.raft.rpc.service.callback.PreVoteCallback;
 import com.siesta.raft.rpc.service.callback.RequestVoteCallback;
 import com.siesta.raft.storage.LogStorage;
 import com.siesta.raft.utils.ConfigurationUtils;
+import com.siesta.raft.utils.timer.RepeatedTimer;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -39,6 +41,9 @@ public class NodeImpl implements Node, RaftServerService, RaftHandlerResponseSer
     private LogStorage logStorage;
     private RaftClientService clientService;
 
+    // timer
+    private RepeatedTimer voteTimer;
+
     public NodeImpl(RaftProto.Configuration configuration, RaftProto.Server server) {
         this.configuration = configuration;
         this.localServer = server;
@@ -52,6 +57,19 @@ public class NodeImpl implements Node, RaftServerService, RaftHandlerResponseSer
         this.preVoteBallot = new Ballot();
         this.voteBallot = new Ballot();
         this.nodeOptions = options;
+
+        this.voteTimer = new RepeatedTimer(1) {
+            @Override
+            protected void onTrigger() {
+                preVote();
+            }
+
+            @Override
+            protected int adjustTimout() {
+                return getElectionTimeout();
+            }
+        };
+
         return true;
     }
 
@@ -352,4 +370,14 @@ public class NodeImpl implements Node, RaftServerService, RaftHandlerResponseSer
         }
         return isOK;
     }
+
+    /**
+     * 获取选举超时时间，超时之后就可以触发选举
+     * 防止多个Server同时超时，出现选票均分的情况，导致一直选不出leader，因此每一个server的超时时间采用随机的方式
+     */
+    private int getElectionTimeout() {
+        ThreadLocalRandom random = ThreadLocalRandom.current();
+        return this.nodeOptions.getElectionTimeout() + random.nextInt(this.nodeOptions.getElectionTimeout());
+    }
+
 }
