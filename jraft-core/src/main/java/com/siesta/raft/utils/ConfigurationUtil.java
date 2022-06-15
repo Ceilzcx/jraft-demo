@@ -6,9 +6,9 @@ import com.siesta.raft.entity.RaftProto;
  * @author hujiaofen
  * @since 27/5/2022
  */
-public class ConfigurationUtils {
+public class ConfigurationUtil {
 
-    private ConfigurationUtils() {}
+    private ConfigurationUtil() {}
 
     public static RaftProto.Server parseServer(String str) {
         return null;
