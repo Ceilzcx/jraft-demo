@@ -17,8 +17,14 @@ public abstract class RepeatedTimer {
         this.scheduledExecutorService = Executors.newScheduledThreadPool(poolSize);
     }
 
+    /**
+     * timeout execute method
+     */
     protected abstract void onTrigger();
 
+    /**
+     * timeout milliseconds
+     */
     protected abstract int adjustTimout();
 
     public void start() {
