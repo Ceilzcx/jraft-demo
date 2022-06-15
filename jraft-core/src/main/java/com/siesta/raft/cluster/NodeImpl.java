@@ -8,7 +8,7 @@ import com.siesta.raft.rpc.service.RaftServerService;
 import com.siesta.raft.rpc.service.callback.PreVoteCallback;
 import com.siesta.raft.rpc.service.callback.RequestVoteCallback;
 import com.siesta.raft.storage.LogStorage;
-import com.siesta.raft.utils.ConfigurationUtils;
+import com.siesta.raft.utils.ConfigurationUtil;
 import com.siesta.raft.utils.timer.RepeatedTimer;
 import lombok.extern.slf4j.Slf4j;
 
@@ -75,7 +75,8 @@ public class NodeImpl implements Node, RaftServerService, RaftHandlerResponseSer
 
     @Override
     public void shutdown() {
-
+        this.logStorage.shutdown();
+        this.voteTimer.cancel();
     }
 
     @Override
@@ -114,7 +115,47 @@ public class NodeImpl implements Node, RaftServerService, RaftHandlerResponseSer
 
     @Override
     public RaftProto.AppendEntriesResponse handleAppendEntries(RaftProto.AppendEntriesRequest request) {
-        return null;
+        this.writeLock.lock();
+        int entriesCount = request.getLogEntriesCount();
+        try {
+            RaftProto.AppendEntriesResponse.Builder builder = RaftProto.AppendEntriesResponse.newBuilder();
+            builder.setTerm(this.currentTerm);
+            if (request.getTerm() < this.currentTerm) {
+                log.warn("append entries request invalid. Node {} current term {} bigger than term {}",
+                        this.localServer, this.currentTerm, request.getTerm());
+                return builder.setSuccess(false).build();
+            }
+
+            if (request.getLeaderId() != this.leaderServer) {
+                log.warn("append entries request invalid. Node {} leader {} request node {}",
+                        this.localServer, this.leaderServer, request.getLeaderId());
+                // todo 如何处理leader不相等的情况？term更新
+                return builder.setSuccess(false).build();
+            }
+            long lastLogIndex = this.logStorage.getLastLogIndex();
+            long lastLogTerm = this.logStorage.getLogEntry(lastLogIndex).getTerm();
+            boolean isOk = compareLog(lastLogIndex, lastLogTerm, "append entries request invalid.");
+            if (!isOk) {
+                return builder.setSuccess(false)
+                        .setLastLogIndex(lastLogIndex)
+                        .build();
+            }
+            if (entriesCount == 0) {
+                // todo heartbeat
+            } else {
+                // log replicate
+                if (this.logStorage.appendEntries(request.getLogEntriesList()) != entriesCount) {
+                    log.warn("append entries request invalid. storage log entries size less than {}", entriesCount);
+                }
+                lastLogIndex = this.logStorage.getLastLogIndex();
+            }
+            this.voteTimer.cancel();
+            return builder.setSuccess(true)
+                    .setLastLogIndex(lastLogIndex)
+                    .build();
+        } finally {
+            this.writeLock.unlock();
+        }
     }
 
     @Override
@@ -174,7 +215,7 @@ public class NodeImpl implements Node, RaftServerService, RaftHandlerResponseSer
         try {
             RaftProto.Server granted = null;
             do {
-                if (!ConfigurationUtils.containsNode(this.configuration, request.getServerId())) {
+                if (!ConfigurationUtil.containsNode(this.configuration, request.getServerId())) {
                     log.warn("pre vote request invalid, configuration not contains node {}", request.getServerId());
                     break;
                 }
@@ -288,7 +329,7 @@ public class NodeImpl implements Node, RaftServerService, RaftHandlerResponseSer
         try {
             RaftProto.Server granted = null;
             do {
-                if (!ConfigurationUtils.containsNode(this.configuration, request.getServerId())) {
+                if (!ConfigurationUtil.containsNode(this.configuration, request.getServerId())) {
                     log.warn("request vote request invalid, configuration not contains node {}", request.getServerId());
                     break;
                 }
@@ -352,7 +393,10 @@ public class NodeImpl implements Node, RaftServerService, RaftHandlerResponseSer
     }
 
     private void stepDown(long term) {
-
+        if (term > this.currentTerm) {
+            this.currentTerm = term;
+            this.nodeType = NodeType.FOLLOWER;
+        }
     }
 
     private void becomeLeader() {
@@ -366,7 +410,7 @@ public class NodeImpl implements Node, RaftServerService, RaftHandlerResponseSer
         // todo log is not consistency, is ok?
         if (!isOK) {
             log.warn("{}, request lastLogIndex: {}, lastLogTerm: {}, local lastLogIndex: {}, lastLogTerm: {}",
-                    logTitle, lastLogIndex, lastLogTerm, lastLogIndex, lastLogTerm);
+                    logTitle, lastLogIndex, lastLogTerm, localLastLogIndex, localLastLogTerm);
         }
         return isOK;
     }
