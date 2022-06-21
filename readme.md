@@ -120,3 +120,4 @@ election timeout 每次采用随机值的方式，这样各个Server成为候选
 
 [wenweihu86/raft-java: Raft Java implementation which is simple and easy to understand. (github.com)](https://github.com/wenweihu86/raft-java)
 
+[soft-jraft](https://github.com/sofastack/sofa-jraft)
