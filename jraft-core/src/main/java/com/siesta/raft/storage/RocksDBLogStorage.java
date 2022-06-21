@@ -95,6 +95,7 @@ public class RocksDBLogStorage implements LogStorage {
         }
     }
 
+    @Override
     public long getFirstLogIndex() {
         if (this.firstIndex == -1) {
             try (RocksIterator it = this.rocksDB.newIterator(this.readOptions)) {

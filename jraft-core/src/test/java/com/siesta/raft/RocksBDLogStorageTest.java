@@ -3,9 +3,10 @@ package com.siesta.raft;
 import com.google.protobuf.ByteString;
 import com.siesta.raft.entity.EntryType;
 import com.siesta.raft.entity.RaftProto;
+import com.siesta.raft.exception.ExtensionException;
+import com.siesta.raft.extension.ExtensionLoader;
 import com.siesta.raft.storage.LogStorage;
 import com.siesta.raft.storage.LogStorageOptions;
-import com.siesta.raft.storage.RocksDBLogStorage;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -19,8 +20,8 @@ public class RocksBDLogStorageTest {
     private LogStorage logStorage;
 
     @Before
-    public void init() {
-        this.logStorage = new RocksDBLogStorage();
+    public void init() throws ExtensionException {
+        this.logStorage = ExtensionLoader.getExtensionLoader(LogStorage.class).getDefaultExtension();
         LogStorageOptions options = new LogStorageOptions();
         options.setPath("C:\\Ceilzcx\\project\\data\\raft-demo");
         this.logStorage.init(options);

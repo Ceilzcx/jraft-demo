@@ -2,6 +2,7 @@ package com.siesta.raft.storage;
 
 import com.siesta.raft.Lifecycle;
 import com.siesta.raft.entity.RaftProto;
+import com.siesta.raft.extension.SPI;
 
 import java.util.List;
 
@@ -10,7 +11,10 @@ import java.util.List;
  * @since 27/5/2022
  * log存储和获取接口
  */
+@SPI("rocksdb")
 public interface LogStorage extends Lifecycle<LogStorageOptions> {
+
+    long getFirstLogIndex();
 
     long getLastLogIndex();
 
