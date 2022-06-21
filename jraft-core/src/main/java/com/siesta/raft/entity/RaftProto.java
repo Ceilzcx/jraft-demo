@@ -1336,9 +1336,19 @@ public final class RaftProto {
      */
     long getTerm();
 
-    // optional int64 index = 2;
+    // optional int32 type = 2;
     /**
-     * <code>optional int64 index = 2;</code>
+     * <code>optional int32 type = 2;</code>
+     */
+    boolean hasType();
+    /**
+     * <code>optional int32 type = 2;</code>
+     */
+    int getType();
+
+    // optional int64 index = 3;
+    /**
+     * <code>optional int64 index = 3;</code>
      *
      * <pre>
      * 下标, 和下标一起检测不一致性
@@ -1346,7 +1356,7 @@ public final class RaftProto {
      */
     boolean hasIndex();
     /**
-     * <code>optional int64 index = 2;</code>
+     * <code>optional int64 index = 3;</code>
      *
      * <pre>
      * 下标, 和下标一起检测不一致性
@@ -1354,9 +1364,9 @@ public final class RaftProto {
      */
     long getIndex();
 
-    // optional bytes data = 3;
+    // optional bytes data = 4;
     /**
-     * <code>optional bytes data = 3;</code>
+     * <code>optional bytes data = 4;</code>
      *
      * <pre>
      * 操作指令
@@ -1364,7 +1374,7 @@ public final class RaftProto {
      */
     boolean hasData();
     /**
-     * <code>optional bytes data = 3;</code>
+     * <code>optional bytes data = 4;</code>
      *
      * <pre>
      * 操作指令
@@ -1430,11 +1440,16 @@ public final class RaftProto {
             }
             case 16: {
               bitField0_ |= 0x00000002;
+              type_ = input.readInt32();
+              break;
+            }
+            case 24: {
+              bitField0_ |= 0x00000004;
               index_ = input.readInt64();
               break;
             }
-            case 26: {
-              bitField0_ |= 0x00000004;
+            case 34: {
+              bitField0_ |= 0x00000008;
               data_ = input.readBytes();
               break;
             }
@@ -1502,21 +1517,37 @@ public final class RaftProto {
       return term_;
     }
 
-    // optional int64 index = 2;
-    public static final int INDEX_FIELD_NUMBER = 2;
+    // optional int32 type = 2;
+    public static final int TYPE_FIELD_NUMBER = 2;
+    private int type_;
+    /**
+     * <code>optional int32 type = 2;</code>
+     */
+    public boolean hasType() {
+      return ((bitField0_ & 0x00000002) == 0x00000002);
+    }
+    /**
+     * <code>optional int32 type = 2;</code>
+     */
+    public int getType() {
+      return type_;
+    }
+
+    // optional int64 index = 3;
+    public static final int INDEX_FIELD_NUMBER = 3;
     private long index_;
     /**
-     * <code>optional int64 index = 2;</code>
+     * <code>optional int64 index = 3;</code>
      *
      * <pre>
      * 下标, 和下标一起检测不一致性
      * </pre>
      */
     public boolean hasIndex() {
-      return ((bitField0_ & 0x00000002) == 0x00000002);
+      return ((bitField0_ & 0x00000004) == 0x00000004);
     }
     /**
-     * <code>optional int64 index = 2;</code>
+     * <code>optional int64 index = 3;</code>
      *
      * <pre>
      * 下标, 和下标一起检测不一致性
@@ -1526,21 +1557,21 @@ public final class RaftProto {
       return index_;
     }
 
-    // optional bytes data = 3;
-    public static final int DATA_FIELD_NUMBER = 3;
+    // optional bytes data = 4;
+    public static final int DATA_FIELD_NUMBER = 4;
     private com.google.protobuf.ByteString data_;
     /**
-     * <code>optional bytes data = 3;</code>
+     * <code>optional bytes data = 4;</code>
      *
      * <pre>
      * 操作指令
      * </pre>
      */
     public boolean hasData() {
-      return ((bitField0_ & 0x00000004) == 0x00000004);
+      return ((bitField0_ & 0x00000008) == 0x00000008);
     }
     /**
-     * <code>optional bytes data = 3;</code>
+     * <code>optional bytes data = 4;</code>
      *
      * <pre>
      * 操作指令
@@ -1552,6 +1583,7 @@ public final class RaftProto {
 
     private void initFields() {
       term_ = 0L;
+      type_ = 0;
       index_ = 0L;
       data_ = com.google.protobuf.ByteString.EMPTY;
     }
@@ -1571,10 +1603,13 @@ public final class RaftProto {
         output.writeInt64(1, term_);
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
-        output.writeInt64(2, index_);
+        output.writeInt32(2, type_);
       }
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
-        output.writeBytes(3, data_);
+        output.writeInt64(3, index_);
+      }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        output.writeBytes(4, data_);
       }
       getUnknownFields().writeTo(output);
     }
@@ -1591,11 +1626,15 @@ public final class RaftProto {
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeInt64Size(2, index_);
+          .computeInt32Size(2, type_);
       }
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(3, data_);
+          .computeInt64Size(3, index_);
+      }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(4, data_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -1715,10 +1754,12 @@ public final class RaftProto {
         super.clear();
         term_ = 0L;
         bitField0_ = (bitField0_ & ~0x00000001);
-        index_ = 0L;
+        type_ = 0;
         bitField0_ = (bitField0_ & ~0x00000002);
-        data_ = com.google.protobuf.ByteString.EMPTY;
+        index_ = 0L;
         bitField0_ = (bitField0_ & ~0x00000004);
+        data_ = com.google.protobuf.ByteString.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000008);
         return this;
       }
 
@@ -1754,9 +1795,13 @@ public final class RaftProto {
         if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
           to_bitField0_ |= 0x00000002;
         }
-        result.index_ = index_;
+        result.type_ = type_;
         if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
           to_bitField0_ |= 0x00000004;
+        }
+        result.index_ = index_;
+        if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
+          to_bitField0_ |= 0x00000008;
         }
         result.data_ = data_;
         result.bitField0_ = to_bitField0_;
@@ -1777,6 +1822,9 @@ public final class RaftProto {
         if (other == LogEntry.getDefaultInstance()) return this;
         if (other.hasTerm()) {
           setTerm(other.getTerm());
+        }
+        if (other.hasType()) {
+          setType(other.getType());
         }
         if (other.hasIndex()) {
           setIndex(other.getIndex());
@@ -1860,20 +1908,53 @@ public final class RaftProto {
         return this;
       }
 
-      // optional int64 index = 2;
+      // optional int32 type = 2;
+      private int type_ ;
+      /**
+       * <code>optional int32 type = 2;</code>
+       */
+      public boolean hasType() {
+        return ((bitField0_ & 0x00000002) == 0x00000002);
+      }
+      /**
+       * <code>optional int32 type = 2;</code>
+       */
+      public int getType() {
+        return type_;
+      }
+      /**
+       * <code>optional int32 type = 2;</code>
+       */
+      public Builder setType(int value) {
+        bitField0_ |= 0x00000002;
+        type_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional int32 type = 2;</code>
+       */
+      public Builder clearType() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        type_ = 0;
+        onChanged();
+        return this;
+      }
+
+      // optional int64 index = 3;
       private long index_ ;
       /**
-       * <code>optional int64 index = 2;</code>
+       * <code>optional int64 index = 3;</code>
        *
        * <pre>
        * 下标, 和下标一起检测不一致性
        * </pre>
        */
       public boolean hasIndex() {
-        return ((bitField0_ & 0x00000002) == 0x00000002);
+        return ((bitField0_ & 0x00000004) == 0x00000004);
       }
       /**
-       * <code>optional int64 index = 2;</code>
+       * <code>optional int64 index = 3;</code>
        *
        * <pre>
        * 下标, 和下标一起检测不一致性
@@ -1883,46 +1964,46 @@ public final class RaftProto {
         return index_;
       }
       /**
-       * <code>optional int64 index = 2;</code>
+       * <code>optional int64 index = 3;</code>
        *
        * <pre>
        * 下标, 和下标一起检测不一致性
        * </pre>
        */
       public Builder setIndex(long value) {
-        bitField0_ |= 0x00000002;
+        bitField0_ |= 0x00000004;
         index_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>optional int64 index = 2;</code>
+       * <code>optional int64 index = 3;</code>
        *
        * <pre>
        * 下标, 和下标一起检测不一致性
        * </pre>
        */
       public Builder clearIndex() {
-        bitField0_ = (bitField0_ & ~0x00000002);
+        bitField0_ = (bitField0_ & ~0x00000004);
         index_ = 0L;
         onChanged();
         return this;
       }
 
-      // optional bytes data = 3;
+      // optional bytes data = 4;
       private com.google.protobuf.ByteString data_ = com.google.protobuf.ByteString.EMPTY;
       /**
-       * <code>optional bytes data = 3;</code>
+       * <code>optional bytes data = 4;</code>
        *
        * <pre>
        * 操作指令
        * </pre>
        */
       public boolean hasData() {
-        return ((bitField0_ & 0x00000004) == 0x00000004);
+        return ((bitField0_ & 0x00000008) == 0x00000008);
       }
       /**
-       * <code>optional bytes data = 3;</code>
+       * <code>optional bytes data = 4;</code>
        *
        * <pre>
        * 操作指令
@@ -1932,7 +2013,7 @@ public final class RaftProto {
         return data_;
       }
       /**
-       * <code>optional bytes data = 3;</code>
+       * <code>optional bytes data = 4;</code>
        *
        * <pre>
        * 操作指令
@@ -1942,20 +2023,20 @@ public final class RaftProto {
         if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00000004;
+  bitField0_ |= 0x00000008;
         data_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>optional bytes data = 3;</code>
+       * <code>optional bytes data = 4;</code>
        *
        * <pre>
        * 操作指令
        * </pre>
        */
       public Builder clearData() {
-        bitField0_ = (bitField0_ & ~0x00000004);
+        bitField0_ = (bitField0_ & ~0x00000008);
         data_ = getDefaultInstance().getData();
         onChanged();
         return this;
@@ -5420,20 +5501,21 @@ public final class RaftProto {
       "\n\nRaft.proto\022\004raft\"9\n\006Server\022\020\n\010serverId" +
       "\030\001 \001(\005\022\014\n\004port\030\002 \001(\005\022\017\n\007address\030\003 \001(\t\".\n" +
       "\rConfiguration\022\035\n\007servers\030\001 \003(\0132\014.raft.S" +
-      "erver\"5\n\010LogEntry\022\014\n\004term\030\001 \001(\003\022\r\n\005index" +
-      "\030\002 \001(\003\022\014\n\004data\030\003 \001(\014\"\271\001\n\024AppendEntriesRe" +
-      "quest\022\014\n\004term\030\001 \001(\003\022\017\n\007groupId\030\002 \001(\t\022\036\n\010" +
-      "leaderId\030\003 \001(\0132\014.raft.Server\022\024\n\014prevLogI" +
-      "ndex\030\004 \001(\003\022\023\n\013prevLogTerm\030\005 \001(\003\022\"\n\nlogEn" +
-      "tries\030\006 \003(\0132\016.raft.LogEntry\022\023\n\013commitInd" +
-      "ex\030\007 \001(\003\"L\n\025AppendEntriesResponse\022\014\n\004ter",
-      "m\030\001 \001(\003\022\017\n\007success\030\002 \001(\010\022\024\n\014lastLogIndex" +
-      "\030\003 \001(\003\"w\n\013VoteRequest\022\014\n\004term\030\001 \001(\003\022\017\n\007g" +
-      "roupId\030\002 \001(\t\022\036\n\010serverId\030\003 \001(\0132\014.raft.Se" +
-      "rver\022\024\n\014lastLogIndex\030\004 \001(\003\022\023\n\013lastLogTer" +
-      "m\030\005 \001(\003\"?\n\014VoteResponse\022\014\n\004term\030\001 \001(\003\022!\n" +
-      "\013voteGranted\030\002 \001(\0132\014.raft.ServerB#\n\026com." +
-      "siesta.raft.entityB\tRaftProto"
+      "erver\"C\n\010LogEntry\022\014\n\004term\030\001 \001(\003\022\014\n\004type\030" +
+      "\002 \001(\005\022\r\n\005index\030\003 \001(\003\022\014\n\004data\030\004 \001(\014\"\271\001\n\024A" +
+      "ppendEntriesRequest\022\014\n\004term\030\001 \001(\003\022\017\n\007gro" +
+      "upId\030\002 \001(\t\022\036\n\010leaderId\030\003 \001(\0132\014.raft.Serv" +
+      "er\022\024\n\014prevLogIndex\030\004 \001(\003\022\023\n\013prevLogTerm\030" +
+      "\005 \001(\003\022\"\n\nlogEntries\030\006 \003(\0132\016.raft.LogEntr" +
+      "y\022\023\n\013commitIndex\030\007 \001(\003\"L\n\025AppendEntriesR",
+      "esponse\022\014\n\004term\030\001 \001(\003\022\017\n\007success\030\002 \001(\010\022\024" +
+      "\n\014lastLogIndex\030\003 \001(\003\"w\n\013VoteRequest\022\014\n\004t" +
+      "erm\030\001 \001(\003\022\017\n\007groupId\030\002 \001(\t\022\036\n\010serverId\030\003" +
+      " \001(\0132\014.raft.Server\022\024\n\014lastLogIndex\030\004 \001(\003" +
+      "\022\023\n\013lastLogTerm\030\005 \001(\003\"?\n\014VoteResponse\022\014\n" +
+      "\004term\030\001 \001(\003\022!\n\013voteGranted\030\002 \001(\0132\014.raft." +
+      "ServerB#\n\026com.siesta.raft.entityB\tRaftPr" +
+      "oto"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -5457,7 +5539,7 @@ public final class RaftProto {
           internal_static_raft_LogEntry_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_raft_LogEntry_descriptor,
-              new String[] { "Term", "Index", "Data", });
+              new String[] { "Term", "Type", "Index", "Data", });
           internal_static_raft_AppendEntriesRequest_descriptor =
             getDescriptor().getMessageTypes().get(3);
           internal_static_raft_AppendEntriesRequest_fieldAccessorTable = new

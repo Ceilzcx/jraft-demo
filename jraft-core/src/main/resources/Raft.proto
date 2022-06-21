@@ -16,8 +16,9 @@ message Configuration {
 
 message LogEntry {
   optional int64 term = 1;      // 用于检测日志的不一致
-  optional int64 index = 2;     // 下标, 和下标一起检测不一致性
-  optional bytes data = 3;      // 操作指令
+  optional int32 type = 2;
+  optional int64 index = 3;     // 下标, 和下标一起检测不一致性
+  optional bytes data = 4;      // 操作指令
 }
 
 message AppendEntriesRequest {
