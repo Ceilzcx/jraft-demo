@@ -2,7 +2,7 @@ package com.siesta.raft.rpc.service;
 
 
 import com.siesta.raft.entity.RaftProto;
-import com.siesta.raft.rpc.RpcClient;
+import com.siesta.raft.rpc.RaftClient;
 import com.siesta.raft.rpc.service.callback.PreVoteCallback;
 import com.siesta.raft.rpc.service.callback.RequestVoteCallback;
 
@@ -10,7 +10,7 @@ import com.siesta.raft.rpc.service.callback.RequestVoteCallback;
  * @author hujiaofen
  * @since 27/5/2022
  */
-public interface RaftClientService extends RpcClient {
+public interface RaftClientService extends RaftClient {
 
     RaftProto.AppendEntriesResponse appendEntries(RaftProto.Server server, RaftProto.AppendEntriesRequest request);
 

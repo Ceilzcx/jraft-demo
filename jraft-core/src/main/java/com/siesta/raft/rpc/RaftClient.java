@@ -6,7 +6,7 @@ import com.siesta.raft.entity.RaftProto;
  * @author hujiaofen
  * @since 27/5/2022
  */
-public interface RpcClient {
+public interface RaftClient {
 
     boolean checkConnection(final RaftProto.Server server);
 
